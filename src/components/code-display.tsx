@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -16,11 +17,20 @@ import { cn } from "@/lib/utils";
 interface CodeDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   code: string | null;
-  language?: string; // e.g., 'java', 'xml'
+  language?: string; // e.g., 'java', 'xml', 'auto' or leave undefined
+  placeholder?: string;
 }
 
-export function CodeDisplay({ title, code, language, className, ...props }: CodeDisplayProps) {
+export function CodeDisplay({
+  title,
+  code,
+  language,
+  placeholder = "// Code will appear here...",
+  className,
+  ...props
+}: CodeDisplayProps) {
   const { toast } = useToast();
+  const displayLanguage = language === 'auto' || !language ? '' : `language-${language}`;
 
   const handleCopy = async () => {
     if (!code) return;
@@ -56,10 +66,14 @@ export function CodeDisplay({ title, code, language, className, ...props }: Code
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden">
         <ScrollArea className="h-full">
-          <pre className="p-4 text-sm overflow-x-auto">
-            <code className={`language-${language}`}>
-              {code ?? "// Code will appear here..."}
-            </code>
+          <pre className="p-4 text-sm overflow-x-auto bg-muted/20">
+            {code ? (
+              <code className={displayLanguage}>
+                {code}
+              </code>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
           </pre>
         </ScrollArea>
       </CardContent>

@@ -1,14 +1,16 @@
+
 "use client";
 
 import * as React from "react";
 import { useState } from "react";
+import Link from 'next/link'; // Import Link
 import { generateCalculatorCode } from "@/ai/flows/generate-calculator-code";
 import type { GenerateCalculatorCodeOutput } from "@/ai/flows/generate-calculator-code";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CodeDisplay } from "@/components/code-display";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, GitCompareArrows } from "lucide-react"; // Import GitCompareArrows
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Home() {
@@ -35,13 +37,21 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 md:p-12 lg:p-24 bg-secondary/30">
       <div className="container mx-auto max-w-6xl space-y-8">
-        <header className="text-center">
+        <header className="text-center relative">
           <h1 className="text-4xl font-bold tracking-tight text-primary mb-2">
-            CodeCalc
+            CodeCalc & Compare
           </h1>
           <p className="text-lg text-muted-foreground">
-            Scientific Calculator Code Generator
+            Generate & Compare Scientific Calculator Code
           </p>
+          {/* Add Compare Button */}
+          <div className="absolute top-0 right-0 mt-2 mr-2">
+             <Link href="/compare" passHref legacyBehavior>
+               <Button variant="outline" size="icon" aria-label="Compare Code">
+                 <GitCompareArrows className="h-5 w-5" />
+               </Button>
+             </Link>
+          </div>
         </header>
 
         <Card className="shadow-lg">
