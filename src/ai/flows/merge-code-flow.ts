@@ -30,10 +30,10 @@ export async function mergeCode(input: MergeCodeInput): Promise<MergeCodeOutput>
 const prompt = ai.definePrompt({
   name: 'mergeCodePrompt',
   input: {
-    schema: MergeCodeInputSchema,
+    schema: MergeCodeInputSchema, // Use the internal schema
   },
   output: {
-    schema: MergeCodeOutputSchema,
+    schema: MergeCodeOutputSchema, // Use the internal schema
   },
   prompt: `You are an expert software engineer specializing in code merging and conflict resolution.
 You will be given two versions of a code snippet: an "original" version and a "duplicate" (potentially modified) version.

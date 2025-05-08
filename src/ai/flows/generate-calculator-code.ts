@@ -30,17 +30,10 @@ export async function generateCalculatorCode(input: GenerateCalculatorCodeInput)
 const prompt = ai.definePrompt({
   name: 'generateCalculatorCodePrompt',
   input: {
-    schema: z.object({
-      featureDescription: z
-        .string()
-        .describe('The description of the scientific calculator feature to generate code for.'),
-    }),
+    schema: GenerateCalculatorCodeInputSchema, // Use the internal schema
   },
   output: {
-    schema: z.object({
-      javaCode: z.string().describe('The generated Java code snippet.'),
-      xmlCode: z.string().describe('The generated XML code snippet.'),
-    }),
+    schema: GenerateCalculatorCodeOutputSchema, // Use the internal schema
   },
   prompt: `You are an expert software engineer specializing in creating scientific calculators in Java and XML.
 

@@ -17,8 +17,9 @@ import { cn } from "@/lib/utils";
 interface CodeDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   code: string | null;
-  language?: string; // e.g., 'java', 'xml', 'auto' or leave undefined
+  language?: string; 
   placeholder?: string;
+  onCopySuccess?: () => void;
 }
 
 export function CodeDisplay({
@@ -27,6 +28,7 @@ export function CodeDisplay({
   language,
   placeholder = "// Code will appear here...",
   className,
+  onCopySuccess,
   ...props
 }: CodeDisplayProps) {
   const { toast } = useToast();
@@ -40,6 +42,9 @@ export function CodeDisplay({
         title: "Copied to clipboard!",
         description: `${title} code has been copied.`,
       });
+      if (onCopySuccess) {
+        onCopySuccess();
+      }
     } catch (err) {
       console.error("Failed to copy: ", err);
       toast({
@@ -51,7 +56,7 @@ export function CodeDisplay({
   };
 
   return (
-    <Card className={cn("flex flex-col h-full shadow-md", className)} {...props}>
+    <Card className={cn("flex flex-col h-full shadow-md transition-colors duration-300", className)} {...props}>
       <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
         <Button
@@ -65,8 +70,8 @@ export function CodeDisplay({
         </Button>
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden">
-        <ScrollArea className="h-full">
-          <pre className="p-4 text-sm overflow-x-auto bg-muted/20">
+        <ScrollArea className="h-full max-h-[400px] min-h-[200px]"> {/* Added max-h and ensured min-h for consistency */}
+          <pre className="p-4 text-sm overflow-x-auto bg-muted/20 h-full">
             {code ? (
               <code className={displayLanguage}>
                 {code}
