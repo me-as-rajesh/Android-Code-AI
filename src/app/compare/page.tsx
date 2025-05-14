@@ -71,22 +71,22 @@ export default function ComparePage() {
       <div className="container mx-auto max-w-7xl space-y-8">
         <header className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-primary mb-2">
-            Android Code Compare & Merge
+            Compare & Merge
           </h1>
           <p className="text-lg text-muted-foreground">
-            Upload or paste two Android code snippets (Java/XML), view differences, and merge them.
+            Upload or paste two Code view differences, and merge them.
           </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FileUploader
-            title="Original Android Code"
+            title="Original Code"
             onContentSet={handleContentSet('original')}
             contentName={originalContent.name}
             acceptedFileTypes=".java,.xml,text/plain"
           />
           <FileUploader
-            title="Duplicate Android Code"
+            title="Duplicate Code"
             onContentSet={handleContentSet('duplicate')}
             contentName={duplicateContent.name}
             acceptedFileTypes=".java,.xml,text/plain"
