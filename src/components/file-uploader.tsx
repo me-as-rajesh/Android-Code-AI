@@ -45,10 +45,48 @@ export function FileUploader({
     event.preventDefault();
     event.stopPropagation();
     const file = event.dataTransfer.files?.[0];
-    if (file && file.type.match(acceptedFileTypes.replace(/\./g, '').replace(/,/g, '|'))) {
-      onFileRead(file);
+
+    if (file) {
+      let isAccepted = false;
+      if (acceptedFileTypes === '*/*') {
+        isAccepted = true;
+      } else {
+        const typesArray = acceptedFileTypes.split(',').map(t => {
+          const trimmedType = t.trim().toLowerCase();
+          // Normalize extensions to start with a dot.
+          if (!trimmedType.includes('/') && !trimmedType.startsWith('.') && trimmedType !== '*') {
+            return '.' + trimmedType;
+          }
+          return trimmedType;
+        });
+
+        for (const accType of typesArray) {
+          if (accType.startsWith('.')) { // File extension check
+            if (file.name.toLowerCase().endsWith(accType)) {
+              isAccepted = true;
+              break;
+            }
+          } else if (accType.endsWith('/*')) { // MIME type with wildcard subtype (e.g., image/*)
+            if (file.type && file.type.toLowerCase().startsWith(accType.slice(0, -1))) {
+              isAccepted = true;
+              break;
+            }
+          } else if (accType.includes('/')) { // Specific MIME type (e.g., text/plain)
+            if (file.type && file.type.toLowerCase() === accType) {
+              isAccepted = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (isAccepted) {
+        onFileRead(file);
+      }
+      // Optionally: add a toast or user feedback if the file type is not accepted
     }
-    // Reset input value if needed
+
+    // Reset input value to allow re-uploading the same file if necessary, or if the drop was rejected.
     if (inputRef.current) {
       inputRef.current.value = '';
     }
