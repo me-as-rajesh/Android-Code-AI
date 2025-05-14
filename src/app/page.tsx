@@ -3,7 +3,6 @@
 
 import * as React from "react";
 import { useState } from "react";
-import Link from 'next/link';
 import { generateCalculatorCode } from "@/ai/flows/generate-calculator-code";
 import type { GenerateCalculatorCodeOutput } from "@/ai/flows/generate-calculator-code";
 import { generateFullProject } from "@/ai/flows/generate-full-project-flow";
@@ -14,7 +13,7 @@ import { CodeDisplay } from "@/components/code-display";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Loader2, GitCompareArrows } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Home() {
@@ -38,6 +37,8 @@ export default function Home() {
         const result = await generateFullProject({ featureDescription });
         setFullProjectOutput(result);
       } else {
+        // This flow is still named generateCalculatorCode but will receive generic Android prompts.
+        // The LLM should adapt based on the input.
         const result = await generateCalculatorCode({ featureDescription });
         setGeneratedCode(result);
       }
@@ -54,34 +55,27 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 md:p-12 lg:p-24 bg-secondary/30">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center p-4 md:p-12 lg:p-24 bg-secondary/30"> {/* Adjusted min-h */}
       <div className="container mx-auto max-w-6xl space-y-8">
-        <header className="text-center relative">
+        <header className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-primary mb-2">
-            CodeCalc & Compare
+            Android App Code Generator
           </h1>
           <p className="text-lg text-muted-foreground">
-            Generate & Compare Scientific Calculator Code
+            Generate Java/XML code snippets or full Android projects.
           </p>
-          <div className="absolute top-0 right-0 mt-2 mr-2">
-             <Link href="/compare" passHref legacyBehavior>
-               <Button variant="outline" size="icon" aria-label="Compare Code">
-                 <GitCompareArrows className="h-5 w-5" />
-               </Button>
-             </Link>
-          </div>
         </header>
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Describe Calculator Feature or Project</CardTitle>
+            <CardTitle>Describe Android Feature or Project</CardTitle>
             <CardDescription>
-              Enter a description (e.g., "add a button for calculating sine", "implement factorial function", or "simple calculator" for a full project if checked below).
+              Enter a description for an Android feature or app (e.g., "user login screen", "display a list of items", or "simple image gallery app" for a full project if checked below).
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
-              placeholder="Enter feature or project description here..."
+              placeholder="Describe your Android feature or app..."
               value={featureDescription}
               onChange={(e) => setFeatureDescription(e.target.value)}
               rows={4}
@@ -109,7 +103,6 @@ export default function Home() {
                   checked={isFullProject}
                   onCheckedChange={(checked) => {
                     setIsFullProject(Boolean(checked));
-                    // Clear previous results when toggling
                     setGeneratedCode(null);
                     setFullProjectOutput(null);
                     setCopiedIdentifiers(new Set());
@@ -182,6 +175,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

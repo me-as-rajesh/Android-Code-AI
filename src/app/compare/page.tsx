@@ -40,8 +40,8 @@ export default function ComparePage() {
         setDiffResult(diffChars(originalContent.content, content));
       }
     }
-    setError(null); // Clear error on new content
-    setMergedCode(null); // Clear merge result on new content
+    setError(null); 
+    setMergedCode(null); 
   };
 
   const handleMagicMerge = async () => {
@@ -67,29 +67,29 @@ export default function ComparePage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 md:p-12 lg:p-24 bg-secondary/30">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center p-4 md:p-12 lg:p-24 bg-secondary/30"> {/* Adjusted min-h */}
       <div className="container mx-auto max-w-7xl space-y-8">
         <header className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-primary mb-2">
-            Code Compare & Merge
+            Android Code Compare & Merge
           </h1>
           <p className="text-lg text-muted-foreground">
-            Upload or paste two code snippets, view differences, and merge them magically.
+            Upload or paste two Android code snippets (Java/XML), view differences, and merge them.
           </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FileUploader
-            title="Original"
+            title="Original Android Code"
             onContentSet={handleContentSet('original')}
             contentName={originalContent.name}
-            acceptedFileTypes=".js,.ts,.jsx,.tsx,.java,.xml,.py,.c,.cpp,.cs,.html,.css,.json,text/*"
+            acceptedFileTypes=".java,.xml,text/plain"
           />
           <FileUploader
-            title="Duplicate"
+            title="Duplicate Android Code"
             onContentSet={handleContentSet('duplicate')}
             contentName={duplicateContent.name}
-            acceptedFileTypes=".js,.ts,.jsx,.tsx,.java,.xml,.py,.c,.cpp,.cs,.html,.css,.json,text/*"
+            acceptedFileTypes=".java,.xml,text/plain"
           />
         </div>
 
@@ -152,6 +152,6 @@ export default function ComparePage() {
           </Card>
         )}
       </div>
-    </main>
+    </div>
   );
 }
