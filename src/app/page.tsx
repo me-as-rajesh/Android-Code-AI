@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import AdBanner from "@/components/ad-banner"; // Import AdBanner
 
 export default function Home() {
   const [featureDescription, setFeatureDescription] = useState<string>("");
@@ -65,6 +66,10 @@ export default function Home() {
             Generate Java/XML code snippets or full Android projects.
           </p>
         </header>
+
+        {/* Example Ad Placement */}
+        <AdBanner adSlot="YOUR_AD_SLOT_ID_HERE" />
+
 
         <Card className="shadow-lg">
           <CardHeader>

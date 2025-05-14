@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/navbar'; // Import Navbar
+import Script from 'next/script'; // Import Script
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,8 +27,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const adSenseClientId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID;
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Google AdSense Script */}
+        {adSenseClientId && adSenseClientId !== "YOUR_ADSENSE_CLIENT_ID_HERE" && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseClientId}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
+      </head>
       <body className={cn(
           "min-h-screen bg-background font-sans antialiased",
            geistSans.variable,
