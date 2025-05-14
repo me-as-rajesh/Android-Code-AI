@@ -15,50 +15,38 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { mergeCode } from '@/ai/flows/merge-code-flow';
 import type { MergeCodeOutput } from '@/ai/flows/merge-code-flow';
 
-interface FileState {
+interface ContentState {
   name: string | null;
   content: string | null;
 }
 
 export default function ComparePage() {
-  const [originalFile, setOriginalFile] = useState<FileState>({ name: null, content: null });
-  const [duplicateFile, setDuplicateFile] = useState<FileState>({ name: null, content: null });
+  const [originalContent, setOriginalContent] = useState<ContentState>({ name: null, content: null });
+  const [duplicateContent, setDuplicateContent] = useState<ContentState>({ name: null, content: null });
   const [diffResult, setDiffResult] = useState<Change[] | null>(null);
   const [mergedCode, setMergedCode] = useState<MergeCodeOutput | null>(null);
   const [isLoadingMerge, setIsLoadingMerge] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileRead = (fileType: 'original' | 'duplicate') => (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      if (fileType === 'original') {
-        setOriginalFile({ name: file.name, content });
-        if (duplicateFile.content) {
-          setDiffResult(diffChars(content, duplicateFile.content));
-        }
-      } else {
-        setDuplicateFile({ name: file.name, content });
-        if (originalFile.content) {
-          setDiffResult(diffChars(originalFile.content, content));
-        }
+  const handleContentSet = (contentType: 'original' | 'duplicate') => (content: string, sourceName: string) => {
+    if (contentType === 'original') {
+      setOriginalContent({ name: sourceName, content });
+      if (duplicateContent.content) {
+        setDiffResult(diffChars(content, duplicateContent.content));
       }
-      setError(null); // Clear error on new file upload
-      setMergedCode(null); // Clear merge result on new file upload
-    };
-    reader.onerror = (e) => {
-      console.error("Error reading file:", e);
-      setError(`Error reading file ${file.name}`);
-      if (fileType === 'original') setOriginalFile({ name: file.name, content: null });
-      else setDuplicateFile({ name: file.name, content: null });
-      setDiffResult(null);
-    };
-    reader.readAsText(file);
+    } else {
+      setDuplicateContent({ name: sourceName, content });
+      if (originalContent.content) {
+        setDiffResult(diffChars(originalContent.content, content));
+      }
+    }
+    setError(null); // Clear error on new content
+    setMergedCode(null); // Clear merge result on new content
   };
 
   const handleMagicMerge = async () => {
-    if (!originalFile.content || !duplicateFile.content) {
-      setError("Please upload both original and duplicate files first.");
+    if (!originalContent.content || !duplicateContent.content) {
+      setError("Please provide content for both original and duplicate sources first.");
       return;
     }
     setIsLoadingMerge(true);
@@ -66,8 +54,8 @@ export default function ComparePage() {
     setMergedCode(null);
     try {
       const result = await mergeCode({
-        originalCode: originalFile.content,
-        duplicateCode: duplicateFile.content,
+        originalCode: originalContent.content,
+        duplicateCode: duplicateContent.content,
       });
       setMergedCode(result);
     } catch (err: any) {
@@ -86,20 +74,22 @@ export default function ComparePage() {
             Code Compare & Merge
           </h1>
           <p className="text-lg text-muted-foreground">
-            Upload two code files, view differences, and merge them magically.
+            Upload or paste two code snippets, view differences, and merge them magically.
           </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FileUploader
-            title="Original File"
-            onFileRead={handleFileRead('original')}
-            fileName={originalFile.name}
+            title="Original"
+            onContentSet={handleContentSet('original')}
+            contentName={originalContent.name}
+            acceptedFileTypes=".js,.ts,.jsx,.tsx,.java,.xml,.py,.c,.cpp,.cs,.html,.css,.json,text/*"
           />
           <FileUploader
-            title="Duplicate File"
-            onFileRead={handleFileRead('duplicate')}
-            fileName={duplicateFile.name}
+            title="Duplicate"
+            onContentSet={handleContentSet('duplicate')}
+            contentName={duplicateContent.name}
+            acceptedFileTypes=".js,.ts,.jsx,.tsx,.java,.xml,.py,.c,.cpp,.cs,.html,.css,.json,text/*"
           />
         </div>
 
@@ -121,7 +111,7 @@ export default function ComparePage() {
               <div className="mt-6 text-center">
                 <Button
                   onClick={handleMagicMerge}
-                  disabled={isLoadingMerge || !originalFile.content || !duplicateFile.content}
+                  disabled={isLoadingMerge || !originalContent.content || !duplicateContent.content}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   size="lg"
                 >
@@ -143,13 +133,23 @@ export default function ComparePage() {
         )}
 
         {mergedCode && (
-          <CodeDisplay
-            title="Merged Code"
-            code={mergedCode.mergedCode}
-            language="auto" // Let highlighting library guess
-            className="min-h-[300px]"
-            aria-live="polite"
-          />
+          <Card className="shadow-lg mt-6">
+            <CardHeader>
+                <CardTitle>Merged Code</CardTitle>
+                {mergedCode.explanation && (
+                    <CardDescription className="pt-2">{mergedCode.explanation}</CardDescription>
+                )}
+            </CardHeader>
+            <CardContent>
+                <CodeDisplay
+                    title="Result"
+                    code={mergedCode.mergedCode}
+                    language="auto" 
+                    className="min-h-[300px]"
+                    aria-live="polite"
+                 />
+            </CardContent>
+          </Card>
         )}
       </div>
     </main>
