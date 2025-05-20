@@ -67,13 +67,15 @@ my-app/
 ├── build.gradle
 └── AndroidManifest.xml
 
-Then, for each file or significant code section in the project (as detailed in your projectTree), you MUST provide an object in the 'sections' array containing:
+Then, for each file or significant code section in the project (as detailed in your projectTree), you MUST provide an object in the 'sections' array.
+**Crucially, every single object within the 'sections' array MUST contain all four of the following fields:**
 1.  A 'fileName' (e.g., 'MainActivity.java', 'activity_main.xml', 'styles.xml', 'AndroidManifest.xml', 'build.gradle'). This MUST be unique for each section.
 2.  The 'language' of the code (e.g., 'java', 'xml', 'gradle', 'json', 'kotlin').
-3.  The complete 'code' for that file/section.
-4.  A concise 'explanation' of what this file/section does and its role in the project. This explanation will be shown to the user *before* the code block.
+3.  The complete 'code' for that file/section. Ensure the code is fully generated and not truncated.
+4.  A concise and complete 'explanation' of what this file/section does and its role in the project. This explanation will be shown to the user *before* the code block.
 
 Structure your entire response according to the 'GenerateFullProjectOutputSchema'. The 'projectName', 'projectTree', and 'sections' (an array of file/section objects) are required.
+Ensure **every object** within the 'sections' array strictly adheres to this structure and includes all four fields: \`fileName\`, \`language\`, \`code\`, and \`explanation\`. Incomplete sections or missing fields will cause errors.
 Ensure the generated code is functional, well-structured, and includes common best practices for the type of project requested.
 
 If the request is for an Android application (Java/Kotlin), ensure your 'sections' array includes AT MINIMUM:
@@ -100,16 +102,19 @@ const generateFullProjectFlow = ai.defineFlow(
     if (!output) {
       throw new Error("AI failed to generate the full project structure.");
     }
-    // Ensure uniqueness of fileNames, though the prompt requests it.
+    // Basic check for fileName uniqueness, though schema validation handles missing fields.
     const fileNames = new Set<string>();
     output.sections.forEach(section => {
-        if (fileNames.has(section.fileName)) {
-            // Attempt to make it unique if LLM failed, or log warning.
-            // For now, we'll rely on the LLM getting this right based on the prompt.
-            console.warn(`Duplicate fileName detected from LLM: ${section.fileName}. This might cause issues with UI state.`);
+        // The error indicates a missing fileName, which Zod/Genkit will catch before this.
+        // This check is more for ensuring fileName uniqueness if all sections are valid.
+        if (section.fileName && fileNames.has(section.fileName)) {
+            console.warn(`Duplicate fileName detected from LLM: ${section.fileName}. This might cause issues with UI state if not handled, though Zod validation for the overall structure should pass if individual items are okay.`);
         }
-        fileNames.add(section.fileName);
+        if (section.fileName) {
+          fileNames.add(section.fileName);
+        }
     });
     return output;
   }
 );
+
