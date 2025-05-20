@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
   input: { schema: GenerateFullProjectInputSchema },
   output: { schema: GenerateFullProjectOutputSchema },
   prompt: `You are an expert software engineer tasked with generating the complete source code for a project based on a user's description.
-The output should be structured as a project with multiple files/sections.
+The output must be structured as a project with multiple files/sections.
 For the feature description: "{{featureDescription}}", generate all necessary files.
 
 First, you MUST provide a 'projectName' for the overall project.
@@ -68,14 +68,15 @@ my-app/
 └── AndroidManifest.xml
 
 Then, for each file or significant code section in the project (as detailed in your projectTree), you MUST provide an object in the 'sections' array.
-**Crucially, every single object within the 'sections' array MUST contain all four of the following fields:**
-1.  A 'fileName' (e.g., 'MainActivity.java', 'activity_main.xml', 'styles.xml', 'AndroidManifest.xml', 'build.gradle'). This MUST be unique for each section.
-2.  The 'language' of the code (e.g., 'java', 'xml', 'gradle', 'json', 'kotlin').
-3.  The complete 'code' for that file/section. Ensure the code is fully generated and not truncated.
-4.  A concise and complete 'explanation' of what this file/section does and its role in the project. This explanation will be shown to the user *before* the code block.
+**CRITICAL INSTRUCTION: Every single object within the 'sections' array MUST contain all four of the following fields: 'fileName', 'language', 'code', and 'explanation'.**
+1.  'fileName' (e.g., 'MainActivity.java', 'activity_main.xml', 'styles.xml', 'AndroidManifest.xml', 'build.gradle'). This MUST be unique for each section and MUST NOT be empty.
+2.  'language' (e.g., 'java', 'xml', 'gradle', 'json', 'kotlin'). This MUST be provided and MUST NOT be empty.
+3.  'code' for that file/section. This MUST be the complete code and MUST NOT be truncated or empty.
+4.  'explanation' of what this file/section does. This MUST be a concise but complete explanation and MUST NOT be empty.
 
 Structure your entire response according to the 'GenerateFullProjectOutputSchema'. The 'projectName', 'projectTree', and 'sections' (an array of file/section objects) are required.
-Ensure **every object** within the 'sections' array strictly adheres to this structure and includes all four fields: \`fileName\`, \`language\`, \`code\`, and \`explanation\`. Incomplete sections or missing fields will cause errors.
+Ensure **EVERY SINGLE OBJECT** within the 'sections' array strictly adheres to this structure and includes all four fields: \`fileName\`, \`language\`, \`code\`, and \`explanation\`.
+**Missing fields or incomplete sections (e.g., missing 'fileName', truncated 'code', or empty 'explanation') for ANY item in the 'sections' array will cause critical errors and render the output unusable. Pay meticulous attention to this requirement for every file generated.**
 Ensure the generated code is functional, well-structured, and includes common best practices for the type of project requested.
 
 If the request is for an Android application (Java/Kotlin), ensure your 'sections' array includes AT MINIMUM:
