@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ComponentProps } from 'react';
 import { Button } from '@/components/ui/button';
-import { CodeXml } from 'lucide-react'; // Using CodeXml for Android context
+import { CodeXml, Lightbulb } from 'lucide-react'; // Using CodeXml for Android context, Lightbulb for Prompt
 import { cn } from '@/lib/utils';
 
 interface NavLinkProps extends ComponentProps<typeof Link> {
@@ -35,12 +35,17 @@ export function Navbar() {
           <CodeXml className="h-7 w-7" />
           <span>Android AI Studio</span>
         </Link>
-        <nav className="flex items-center space-x-3 sm:space-x-5">
+        <nav className="flex items-center space-x-2 sm:space-x-3">
           <Button asChild variant={pathname === '/' ? 'default' : 'ghost'} size="sm" className="px-3 py-2 text-sm font-medium">
             <Link href="/">Code Generator</Link>
           </Button>
           <Button asChild variant={pathname === '/compare' ? 'default' : 'ghost'} size="sm" className="px-3 py-2 text-sm font-medium">
             <Link href="/compare">Code Compare</Link>
+          </Button>
+          <Button asChild variant={pathname === '/prompt-generator' ? 'default' : 'ghost'} size="sm" className="px-3 py-2 text-sm font-medium">
+            <Link href="/prompt-generator" className="flex items-center">
+              <Lightbulb className="h-4 w-4 mr-1 sm:mr-2" /> App Prompt
+            </Link>
           </Button>
         </nav>
       </div>
