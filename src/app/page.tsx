@@ -134,6 +134,26 @@ export default function Home() {
             <h2 className="text-2xl font-semibold text-primary text-center my-4">
               Project: {fullProjectOutput.projectName}
             </h2>
+            {fullProjectOutput.projectTree && (
+              <Card className="shadow-md mb-6">
+                <CardHeader>
+                  <CardTitle>Project File Structure</CardTitle>
+                  <CardDescription>
+                    An overview of the generated project's directory and file layout.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CodeDisplay
+                    title="File Tree"
+                    code={fullProjectOutput.projectTree}
+                    language="text"
+                    placeholder="// Project tree structure will appear here"
+                    className="min-h-[200px]"
+                    aria-live="polite"
+                  />
+                </CardContent>
+              </Card>
+            )}
             {fullProjectOutput.sections.map((section, index) => (
               <Card 
                 key={`${section.fileName}-${index}`} 
@@ -152,6 +172,7 @@ export default function Home() {
                     language={section.language}
                     onCopySuccess={() => handleCopySuccess(section.fileName)}
                     placeholder={`// No code provided for ${section.fileName}`}
+                    aria-live="polite"
                   />
                 </CardContent>
               </Card>

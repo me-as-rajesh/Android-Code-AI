@@ -29,6 +29,7 @@ export type ProjectSection = z.infer<typeof ProjectSectionSchema>;
 
 const GenerateFullProjectOutputSchema = z.object({
   projectName: z.string().describe("A suitable name for the project based on the feature description."),
+  projectTree: z.string().describe("A textual representation of the project's file and folder structure. For example: \nmy-app/\n├── src/\n│   ├── MainActivity.java\n│   └── ...\n├── res/\n│   └── ...\n└── AndroidManifest.xml"),
   sections: z
     .array(ProjectSectionSchema)
     .describe(
@@ -49,16 +50,33 @@ const prompt = ai.definePrompt({
 The output should be structured as a project with multiple files/sections.
 For the feature description: "{{featureDescription}}", generate all necessary files.
 
-For each file or significant code section, you MUST provide:
+First, you MUST provide a 'projectName' for the overall project.
+Next, you MUST provide a 'projectTree'. This should be a textual representation of the complete file and folder structure of the generated project.
+Use indentation and symbols like '├──' and '└──' to represent the hierarchy clearly. For example:
+my-app/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/example/app/
+│   │   │       └── MainActivity.java
+│   │   └── res/
+│   │       ├── layout/
+│   │       │   └── activity_main.xml
+│   │       └── values/
+│   │           └── strings.xml
+├── build.gradle
+└── AndroidManifest.xml
+
+Then, for each file or significant code section in the project (as detailed in your projectTree), you MUST provide an object in the 'sections' array containing:
 1.  A 'fileName' (e.g., 'MainActivity.java', 'activity_main.xml', 'styles.xml', 'AndroidManifest.xml', 'build.gradle'). This MUST be unique for each section.
 2.  The 'language' of the code (e.g., 'java', 'xml', 'gradle', 'json', 'kotlin').
 3.  The complete 'code' for that file/section.
 4.  A concise 'explanation' of what this file/section does and its role in the project. This explanation will be shown to the user *before* the code block.
 
-Structure your entire response according to the 'GenerateFullProjectOutputSchema'. The 'sections' field MUST be an array of these file/section objects.
+Structure your entire response according to the 'GenerateFullProjectOutputSchema'. The 'projectName', 'projectTree', and 'sections' (an array of file/section objects) are required.
 Ensure the generated code is functional, well-structured, and includes common best practices for the type of project requested.
 
-If the request is for an Android application (Java/Kotlin), ensure you include AT MINIMUM:
+If the request is for an Android application (Java/Kotlin), ensure your 'sections' array includes AT MINIMUM:
 - Java or Kotlin files for Activities/Logic (e.g., MainActivity.java or MainActivity.kt).
 - XML files for layouts (e.g., activity_main.xml).
 - An AndroidManifest.xml file.
@@ -66,7 +84,6 @@ If the request is for an Android application (Java/Kotlin), ensure you include A
 - Project-level build.gradle (or build.gradle.kts) file.
 - Resource files like strings.xml, colors.xml. Potentially dimens.xml or themes.xml.
 
-Provide a 'projectName' for the overall project as well.
 The list of sections should cover all essential parts of a basic, runnable application for the given description.
 Do not generate overly complex projects unless specifically asked. Focus on a minimal, working example.
 `,
