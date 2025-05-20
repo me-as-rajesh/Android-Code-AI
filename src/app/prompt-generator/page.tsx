@@ -9,16 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { CodeDisplay } from '@/components/code-display';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Lightbulb } from 'lucide-react';
+import { Loader2, Lightbulb, Copy } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import AdBanner from '@/components/ad-banner';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PromptGeneratorPage() {
   const [userInput, setUserInput] = useState<string>('');
   const [generatedPrompt, setGeneratedPrompt] = useState<GenerateAppPromptOutput | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [copiedIdentifiers, setCopiedIdentifiers] = useState<Set<string>>(new Set());
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const { toast } = useToast();
 
   const handleGeneratePrompt = async () => {
     if (!userInput.trim()) {
@@ -28,7 +30,7 @@ export default function PromptGeneratorPage() {
     setIsLoading(true);
     setError(null);
     setGeneratedPrompt(null);
-    setCopiedIdentifiers(new Set());
+    setIsCopied(false);
 
     try {
       const result = await generateAppPrompt({ userInput });
@@ -41,36 +43,39 @@ export default function PromptGeneratorPage() {
     }
   };
 
-  const handleCopySuccess = (identifier: string) => {
-    setCopiedIdentifiers(prev => new Set(prev).add(identifier));
-  };
-
-  const renderOutputSection = (title: string, content: string | string[] | undefined, identifier: string, language: string = 'markdown') => {
-    if (!content) return null;
-    const codeToDisplay = Array.isArray(content) ? content.join('\n- ') : content;
-    const displayTitle = Array.isArray(content) && content.length > 0 && !title.toLowerCase().includes('features') ? `${title} (List)` : title;
+  const formatGeneratedPrompt = (prompt: GenerateAppPromptOutput | null): string => {
+    if (!prompt) return "";
     
-    return (
-      <Card 
-        className={`shadow-md transition-colors duration-300 ${copiedIdentifiers.has(identifier) ? 'bg-green-100 dark:bg-green-800/30 border-green-300 dark:border-green-700' : ''}`}
-      >
-        <CardHeader>
-          <CardTitle>{displayTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CodeDisplay
-            title="" // Title is handled by CardHeader
-            code={codeToDisplay}
-            language={language}
-            onCopySuccess={() => handleCopySuccess(identifier)}
-            placeholder={`// No content generated for ${title}`}
-            className="min-h-[150px]"
-          />
-        </CardContent>
-      </Card>
-    );
+    let formattedString = `## App Blueprint\n${prompt.appBlueprint || 'Not specified'}\n\n`;
+    formattedString += `## Key Features\n${prompt.keyFeatures && prompt.keyFeatures.length > 0 ? prompt.keyFeatures.map(f => `- ${f}`).join('\n') : 'Not specified'}\n\n`;
+    formattedString += `## Target User Persona\n${prompt.targetUserPersona || 'Not specified'}\n\n`;
+    formattedString += `## Style Guidelines\n${prompt.styleGuideline || 'Not specified'}\n\n`;
+    formattedString += `## Layout Description\n${prompt.layoutDescription || 'Not specified'}\n\n`;
+    formattedString += `## Full App Description\n${prompt.fullAppDescription || 'Not specified'}`;
+    
+    return formattedString;
   };
 
+  const handleCopyFullPrompt = async () => {
+    if (!generatedPrompt) return;
+    const fullPromptText = formatGeneratedPrompt(generatedPrompt);
+    try {
+      await navigator.clipboard.writeText(fullPromptText);
+      toast({
+        title: "Copied to clipboard!",
+        description: "The full app prompt has been copied.",
+      });
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy the prompt to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center p-4 md:p-12 lg:p-24 bg-secondary/30">
@@ -131,17 +136,31 @@ export default function PromptGeneratorPage() {
         )}
 
         {generatedPrompt && (
-          <div className="space-y-6 mt-8">
-            <h2 className="text-3xl font-semibold text-primary text-center mb-6">
-              Generated App Prompt
-            </h2>
-            {renderOutputSection('App Blueprint', generatedPrompt.appBlueprint, 'appBlueprint')}
-            {renderOutputSection('Key Features', generatedPrompt.keyFeatures && generatedPrompt.keyFeatures.length > 0 ? `- ${generatedPrompt.keyFeatures.join('\n- ')}` : "Not specified", 'keyFeatures')}
-            {renderOutputSection('Target User Persona', generatedPrompt.targetUserPersona, 'targetUserPersona')}
-            {renderOutputSection('Style Guidelines', generatedPrompt.styleGuideline, 'styleGuideline')}
-            {renderOutputSection('Layout Description', generatedPrompt.layoutDescription, 'layoutDescription')}
-            {renderOutputSection('Full App Description', generatedPrompt.fullAppDescription, 'fullAppDescription')}
-          </div>
+          <Card 
+            className={`shadow-lg mt-8 transition-colors duration-300 ${isCopied ? 'bg-green-100 dark:bg-green-800/30 border-green-300 dark:border-green-700' : ''}`}
+          >
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-2xl">Generated App Prompt</CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopyFullPrompt}
+                aria-label="Copy full generated prompt"
+              >
+                <Copy className="h-5 w-5" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <CodeDisplay
+                title="" // Title is handled by CardHeader now
+                code={formatGeneratedPrompt(generatedPrompt)}
+                language="markdown"
+                placeholder="// Prompt details will appear here..."
+                className="min-h-[300px] max-h-[60vh]" // Ensure scrollability within a max height
+                onCopySuccess={() => { /* Can be removed or adapted if CodeDisplay's internal copy isn't used for the main button */}}
+              />
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
