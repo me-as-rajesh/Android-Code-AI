@@ -76,7 +76,7 @@ Then, for each file or significant code section in the project (as detailed in y
 
 Structure your entire response according to the 'GenerateFullProjectOutputSchema'. The 'projectName', 'projectTree', and 'sections' (an array of file/section objects) are required.
 Ensure **EVERY SINGLE OBJECT** within the 'sections' array strictly adheres to this structure and includes all four fields: \`fileName\`, \`language\`, \`code\`, and \`explanation\`.
-**Missing fields or incomplete sections (e.g., missing 'fileName', truncated 'code', or empty 'explanation') for ANY item in the 'sections' array will cause critical errors and render the output unusable. Pay meticulous attention to this requirement for every file generated.**
+**Missing fields, empty strings, or incomplete sections (e.g., missing 'fileName', truncated 'code', or empty 'explanation') for ANY item in the 'sections' array will cause critical errors and render the output unusable. Pay meticulous attention to this requirement for every file generated. Do not send partial or incomplete objects.**
 Ensure the generated code is functional, well-structured, and includes common best practices for the type of project requested.
 
 If the request is for an Android application (Java/Kotlin), ensure your 'sections' array includes AT MINIMUM:
@@ -118,4 +118,3 @@ const generateFullProjectFlow = ai.defineFlow(
     return output;
   }
 );
-
